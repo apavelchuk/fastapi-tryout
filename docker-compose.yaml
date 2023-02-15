@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  fastapi-db:
+    image: postgres:13-alpine
+    ports:
+      - "5444:5432"
+    environment:
+      "PGDATA": "/var/lib/postgresql/data/pgdata"
+      "POSTGRES_DB": "fastapi"
+      "POSTGRES_PASSWORD": "fastapi"
+      "POSTGRES_USER": "fastapi"
+      "POTGRES_PORT": 5432
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data/pgdata
+
+  fastapi:
+    ports:
+      - "8000:8000"
+    image: fastapi:latest
+    build:
+      context: .
+    depends_on:
+      - fastapi-db
+    volumes:
+      - .:/app
+    environment:
+      DB_CONNECT: "postgresql+asyncpg://fastapi:fastapi@fastapi-db/fastapi"
+      TEST_DB_CONNECT: "sqlite+aiosqlite:///test.db"
